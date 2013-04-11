@@ -1,0 +1,8 @@
+{
+    "name" : "q",
+    "version": "0.0.1",
+    "dependencies": {
+        "redis":    "latest",
+        "hiredis":  "latest"
+    }
+}
