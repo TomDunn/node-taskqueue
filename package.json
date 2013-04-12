@@ -1,9 +1,17 @@
 {
-    "name" : "q",
-    "version": "0.0.1",
+    "author":       "Tom Dunn",
+    "name" :        "node-taskqueue",
+    "description":  "A simple framework for producing and distributing tasks",
+    "main":         "./tasker.js",
+    "version":      "0.0.1",
     "dependencies": {
         "node-uuid":"latest",
-        "redis":    "latest",
+        "redis":    "latest"
+    },
+    "optionalDependencies": {
         "hiredis":  "latest"
+    },
+    "repository": {
+        "url":  "https://github.com/TomDunn/node-taskqueue"
     }
 }
