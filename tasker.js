@@ -1,4 +1,5 @@
 var redis   = require('redis');
+var uuid    = require('node-uuid');
 
 /* Define tasks that can be done remotely */
 function Tasker(opts) {
@@ -10,6 +11,7 @@ function Tasker(opts) {
 
 
     this.client = redis.createClient();
+    this.comm   = redis.createClient();
     this.tasks  = {};
 }
 
@@ -26,11 +28,27 @@ Tasker.prototype.registerTask = function(taskName, taskFunc) {
 
 Tasker.prototype.delayedTask = function(taskName) {
     var that = this;
-    return function(taskDetails) {
+    return function(taskDetails, cb) {
+
         var task = {
             handler:    taskName,
             data:       taskDetails
         };
+
+        if (cb) {
+            var resultChannel = 'result-' + uuid.v4();
+            task.resultChannel = resultChannel;
+
+            that.comm.subscribe(resultChannel);
+            that.comm.on('message', function(channel, message) {
+                if (resultChannel !== channel) return;
+
+                that.comm.unsubscribe(channel);
+
+                var result = JSON.parse(message);
+                cb(result.error, result.data);
+            });
+        }
 
         that.client.rpush(that.queueName, JSON.stringify(task));
     };
@@ -41,6 +59,7 @@ function TaskWorker(opts) {
     if (!opts.tasks) throw "Must provide a Tasker object to worker constructor";
 
     this.client     = opts.tasks.client;
+    this.comm       = opts.tasks.comm;
     this.queueName  = opts.tasks.queueName;
     this.tasks      = opts.tasks.tasks;
     this.delay      = opts.delay || 1000;
@@ -60,7 +79,19 @@ TaskWorker.prototype.checkForTasks = function() {
 
 TaskWorker.prototype.handleTask = function(err,val) {
     if (val == null) return;
-    this.tasks[task.handler].now(task.data);
+
+    var that = this;
+    var task = JSON.parse(val);
+    this.tasks[task.handler].now(task.data, function(err,res) {
+        if (!task.resultChannel) return;
+
+        var result = {
+            error: err,
+            data:  res
+        }
+
+        that.comm.publish(task.resultChannel, JSON.stringify(result));
+    });
 };
 
 module.exports.TaskWorker = TaskWorker;
