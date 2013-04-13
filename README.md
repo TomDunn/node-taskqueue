@@ -3,8 +3,10 @@ node-taskqueue
 
 Uses redis to distribute tasks among any number of workers. Workers have the ability to communicate results back to the initiator.
 
-## TODO
-Create an NPM package.
+## Installation
+```sh
+npm install node-taskqueue
+```
 
 ## Usage
 
