@@ -62,17 +62,13 @@ function TaskWorker(opts) {
     this.comm       = opts.tasks.comm;
     this.queueName  = opts.tasks.queueName;
     this.tasks      = opts.tasks.tasks;
-    this.delay      = opts.delay || 1000;
 
-    var that = this;
-    this.intervalId = setInterval(function() {
-        that.checkForTasks();    
-    }, this.delay);
+    this.checkForTasks();
 };
 
 TaskWorker.prototype.checkForTasks = function() {
     var that = this;
-    this.client.lpop(this.queueName, function(err,val) {
+    this.client.blpop(this.queueName, 0, function(err,val) {
         that.handleTask(err,val);
     });
 };
@@ -81,7 +77,7 @@ TaskWorker.prototype.handleTask = function(err,val) {
     if (val == null) return;
 
     var that = this;
-    var task = JSON.parse(val);
+    var task = JSON.parse(val[1]);
     this.tasks[task.handler].now(task.data, function(err,res) {
         if (!task.resultChannel) return;
 
@@ -92,6 +88,8 @@ TaskWorker.prototype.handleTask = function(err,val) {
 
         that.comm.publish(task.resultChannel, JSON.stringify(result));
     });
+
+    that.checkForTasks();
 };
 
 module.exports.TaskWorker = TaskWorker;
