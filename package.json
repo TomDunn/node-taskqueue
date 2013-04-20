@@ -5,11 +5,11 @@
     "main":         "./tasker.js",
     "version":      "0.0.2",
     "dependencies": {
-        "node-uuid":"latest",
-        "redis":    "latest"
+        "node-uuid":">=1.4.0",
+        "redis":    ">=0.8.3"
     },
     "optionalDependencies": {
-        "hiredis":  "latest"
+        "hiredis":  ">=0.1.15"
     },
     "repository": {
         "url":  "https://github.com/TomDunn/node-taskqueue"
