@@ -3,7 +3,7 @@
     "name" :        "node-taskqueue",
     "description":  "A simple framework for producing and distributing tasks",
     "main":         "./tasker.js",
-    "version":      "0.0.2",
+    "version":      "0.0.3",
     "dependencies": {
         "node-uuid":">=1.4.0",
         "redis":    ">=0.8.3"
